@@ -1,0 +1,50 @@
+name: Syft & Grype Security Scan
+tagline: Generate SBOMs and scan for vulnerabilities using Syft and Grype. Supports Java, Python, Go, and generic projects.
+vendor:
+  name: LaunchPad Technologies
+  url: https://bitbucket.org/launchpadtech
+
+tags:
+  - security
+  - sbom
+  - vulnerability
+  - syft
+  - grype
+  - spdx
+  - cyclonedx
+
+variables:
+  - name: SCAN_PATH
+    description: >
+      Path to scan for dependencies. Defaults to the current directory.
+      For Java projects, point to your build output directory (e.g. build or target).
+    default: '.'
+
+  - name: LANGUAGE
+    description: >
+      Project type to scan. One of: auto, java, python, go, generic.
+      'auto' detects the language from project files (go.mod, requirements.txt, pom.xml, etc.).
+    default: 'auto'
+
+  - name: FAIL_ON
+    description: >
+      Fail the pipeline if vulnerabilities at or above this severity are found.
+      One of: critical, high, medium, low, none.
+      Set to 'none' to never fail on vulnerabilities (report-only mode).
+    default: 'critical'
+
+  - name: ONLY_FIXED
+    description: >
+      When 'true', the policy check only fails on vulnerabilities that have a known fix available.
+      When 'false', fails on all vulnerabilities at or above FAIL_ON severity.
+    default: 'true'
+
+  - name: SBOM_OUTPUT_DIR
+    description: >
+      Directory where SBOM files and vulnerability reports are written.
+      Defaults to the current directory. Must exist or be creatable.
+    default: '.'
+
+  - name: DEBUG
+    description: Enable verbose debug output.
+    default: 'false'
