@@ -45,7 +45,6 @@ SCHEMA = {
         "type": "string",
         "required": False,
         "default": "",
-        "no_get": True,   # mask value in logs
     },
 }
 

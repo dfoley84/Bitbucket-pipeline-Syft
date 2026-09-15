@@ -158,18 +158,25 @@ lines += [
 
 body = "\n".join(lines)
 
-# ─── Remove previous scan comment ────────────────────────────────────────────
-existing = requests.get(f"{API_BASE}/comments?pagelen=100", headers=HEADERS)
-existing.raise_for_status()
-for comment in existing.json().get("values", []):
-    if COMMENT_MARKER in comment.get("content", {}).get("raw", ""):
-        cid = comment["id"]
-        resp = requests.delete(f"{API_BASE}/comments/{cid}", headers=HEADERS)
-        if resp.status_code == 204:
-            print(f"Removed previous scan comment #{cid}")
-        break
+# ─── Remove previous scan comment(s) ─────────────────────────────────────────
+url = f"{API_BASE}/comments?pagelen=100"
+while url:
+    existing = requests.get(url, headers=HEADERS)
+    existing.raise_for_status()
+    page = existing.json()
+    for comment in page.get("values", []):
+        if COMMENT_MARKER in comment.get("content", {}).get("raw", ""):
+            cid = comment["id"]
+            resp = requests.delete(f"{API_BASE}/comments/{cid}", headers=HEADERS)
+            if resp.status_code == 204:
+                print(f"Removed previous scan comment #{cid}")
+    url = page.get("next")
 
 # ─── Post new comment ────────────────────────────────────────────────────────
+if total == 0:
+    print("PR comment | No vulnerabilities found — skipping comment.")
+    sys.exit(0)
+
 resp = requests.post(
     f"{API_BASE}/comments",
     headers=HEADERS,
