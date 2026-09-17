@@ -5,8 +5,10 @@ Reads pipe variables, validates them, then delegates to pipe.sh.
 """
 
 import os
+import re
 import subprocess
 import sys
+from pathlib import Path
 
 from bitbucket_pipes_toolkit import Pipe
 
@@ -90,6 +92,20 @@ class SyftGrypePipe(Pipe):
         )
 
         result = subprocess.run(["/bin/bash", "/pipe.sh"], env=env)
+
+        summary_path = Path(sbom_output_dir) / "sbom-summary.txt"
+        if summary_path.exists():
+            try:
+                summary_text = summary_path.read_text(encoding="utf-8")
+                cleaned_text = re.sub(
+                    r"\s*\(\+\d+ duplicates?\)", "", summary_text
+                )
+                if cleaned_text != summary_text:
+                    summary_path.write_text(cleaned_text, encoding="utf-8")
+            except (OSError, UnicodeError) as exc:
+                print(
+                    f"WARN  | Could not clean duplicate indicators from {summary_path}: {exc}"
+                )
 
         if result.returncode != 0:
             self.fail(

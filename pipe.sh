@@ -84,6 +84,16 @@ syft "dir:${SCAN_PATH}" \
   --output "cyclonedx-json=${SBOM_CDX}" \
   --output "table=${SBOM_TXT}"
 
+if [[ -f "${SBOM_TXT}" ]]; then
+  SBOM_TXT_TMP=$(mktemp "${SBOM_TXT}.XXXXXX")
+  if sed -E 's/[[:space:]]*\(\+[0-9]+ duplicates?\)//g' "${SBOM_TXT}" > "${SBOM_TXT_TMP}"; then
+    mv "${SBOM_TXT_TMP}" "${SBOM_TXT}"
+  else
+    rm -f "${SBOM_TXT_TMP}"
+    warn "Could not clean duplicate indicators from ${SBOM_TXT}"
+  fi
+fi
+
 # Package summary
 PACKAGE_COUNT=$(jq '.packages | length' "${SBOM_SPDX}" 2>/dev/null || echo "0")
 info "Total packages found: ${PACKAGE_COUNT}"
