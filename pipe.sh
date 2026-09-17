@@ -4,6 +4,11 @@
 # Generates SBOMs with Syft and scans for vulnerabilities with Grype.
 # Supports Java (including nested JARs), Python, Go, and generic projects.
 # ─────────────────────────────────────────────────────────────────────────────
+# Re-exec under bash if invoked via a non-bash shell (e.g. `sh pipe.sh`), since dash/ash lack pipefail.
+if [ -z "${BASH_VERSION:-}" ]; then
+  exec bash "$0" "$@"
+fi
+
 set -euo pipefail
 
 # ─── Variables (injected by pipe.py) ─────────────────────────────────────────

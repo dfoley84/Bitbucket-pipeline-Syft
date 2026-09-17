@@ -6,6 +6,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        curl \
        jq \
+       bash \
        ca-certificates \
        findutils \
     && rm -rf /var/lib/apt/lists/*
