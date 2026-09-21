@@ -58,11 +58,33 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-# ─── Load report ─────────────────────────────────────────────────────────────
+# ─── Load report ──────────────────────────────────────────────────────────────
 with open(REPORT_FILE) as f:
     data = json.load(f)
 
 matches = data.get("matches", [])
+
+# ─── Deduplicate matches ──────────────────────────────────────────────────────
+# Grype (or upstream tooling) can occasionally report the exact same
+# package + CVE/GHSA combination more than once (e.g. via multiple
+# matching "details" entries). Collapse those into a single entry so the
+# summary counts and the per-package table don't show duplicate rows.
+seen_match_keys = set()
+deduped_matches = []
+for match in matches:
+    vuln     = match.get("vulnerability", {})
+    artifact = match.get("artifact", {})
+    dedup_key = (
+        artifact.get("name"),
+        artifact.get("version"),
+        vuln.get("id"),
+    )
+    if dedup_key in seen_match_keys:
+        continue
+    seen_match_keys.add(dedup_key)
+    deduped_matches.append(match)
+
+matches = deduped_matches
 
 # ─── Count by severity ────────────────────────────────────────────────────────
 counts = {s: 0 for s in SEVERITY_ORDER}
@@ -96,7 +118,7 @@ top_packages = sorted(
     key=lambda x: min(sev_rank.get(v["severity"], 99) for v in x[1]),
 )[:20]
 
-# ─── Status headline ─────────────────────────────────────────────────────────
+# ─── Status headline ──────────────────────────────────────────────────────────
 if total == 0:
     headline = "✅ **No vulnerabilities found.**"
 elif counts["Critical"] > 0:
@@ -137,7 +159,12 @@ if top_packages:
         "|---------|-----------|----------|----------|-------------|",
     ]
     for pkg, vulns in top_packages:
-        for v in sorted(vulns, key=lambda x: sev_rank.get(x["severity"], 99)):
+        # Combine duplicate CVE/GHSA entries for the same package: keep a
+        # single row per unique vulnerability id, drop exact duplicates.
+        unique_vulns = {}
+        for v in vulns:
+            unique_vulns.setdefault(v["id"], v)
+        for v in sorted(unique_vulns.values(), key=lambda x: sev_rank.get(x["severity"], 99)):
             emoji = SEVERITY_EMOJI.get(v["severity"], "")
             vuln_url = f"https://osv.dev/vulnerability/{v['id']}"
             lines.append(
@@ -172,7 +199,7 @@ while url:
                 print(f"Removed previous scan comment #{cid}")
     url = page.get("next")
 
-# ─── Post new comment ────────────────────────────────────────────────────────
+# ─── Post new comment ─────────────────────────────────────────────────────────
 if total == 0:
     print("PR comment | No vulnerabilities found — skipping comment.")
     sys.exit(0)
