@@ -45,7 +45,7 @@ Add the pipe to any step in your `bitbucket-pipelines.yml`:
 - step:
     name: SBOM & Vulnerability Scan
     script:
-      - pipe: docker://davefoley/bitbucket-syft:latest
+      - pipe: docker://davefoley/bitbucket-syft:0.1.2
         variables:
           SCAN_PATH: '.'              # optional, default: .
           LANGUAGE: 'auto'           # optional, default: auto
@@ -66,7 +66,7 @@ Add the pipe to any step in your `bitbucket-pipelines.yml`:
 
 **Java (Gradle / Maven)**
 ```yaml
-- pipe: docker://davefoley/bitbucket-syft:latest
+- pipe: docker://davefoley/bitbucket-syft:0.1.2
   variables:
     SCAN_PATH: 'build'
     LANGUAGE: 'java'
@@ -83,7 +83,7 @@ Add the pipe to any step in your `bitbucket-pipelines.yml`:
 > `requirements.txt` alongside `pyproject.toml`.
 
 ```yaml
-- pipe: docker://davefoley/bitbucket-syft:latest
+- pipe: docker://davefoley/bitbucket-syft:0.1.2
   variables:
     SCAN_PATH: '.'
     LANGUAGE: 'python'
@@ -94,7 +94,7 @@ Add the pipe to any step in your `bitbucket-pipelines.yml`:
 
 **Go**
 ```yaml
-- pipe: docker://davefoley/bitbucket-syft:latest
+- pipe: docker://davefoley/bitbucket-syft:0.1.2
   variables:
     SCAN_PATH: '.'
     LANGUAGE: 'go'
@@ -104,7 +104,7 @@ Add the pipe to any step in your `bitbucket-pipelines.yml`:
 
 **Report-only (never fail the pipeline)**
 ```yaml
-- pipe: docker://davefoley/bitbucket-syft:latest
+- pipe: docker://davefoley/bitbucket-syft:0.1.2
   variables:
     FAIL_ON: 'none'
     BB_TOKEN: $BB_TOKEN
@@ -170,16 +170,16 @@ pipe.py  (variable validation)
 
 2. Push to `main` to build and publish `latest` automatically.
 
-3. Push a semver tag to publish a versioned release:
+3. Push the `v0.1.2` semver tag to publish the `0.1.2` release:
    ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
+   git tag v0.1.2
+   git push origin v0.1.2
    ```
 
 4. To rebuild and push manually:
    ```bash
-   docker build -t davefoley/bitbucket-syft:latest .
-   docker push davefoley/bitbucket-syft:latest
+   docker build -t davefoley/bitbucket-syft:0.1.2 .
+   docker push davefoley/bitbucket-syft:0.1.2
    ```
 
 ---
@@ -298,10 +298,10 @@ Add the pipe to any step in your `bitbucket-pipelines.yml`:
 
 2. Push to `main` to publish `latest` automatically.
 
-3. Push a tag (`v1.0.0`) to publish a versioned release:
+3. Push a tag (`v0.1.2`) to publish the `0.1.2` release:
    ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
+   git tag v0.1.2
+   git push origin v0.1.2
    ```
 
 ---
