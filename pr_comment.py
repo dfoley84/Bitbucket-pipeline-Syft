@@ -64,6 +64,9 @@ with open(REPORT_FILE) as f:
 
 matches = data.get("matches", [])
 
+# ─── Drop vulnerabilities without an available fix ───────────────────────────
+matches = [m for m in matches if m.get("vulnerability", {}).get("fix", {}).get("versions")]
+
 # ─── Deduplicate matches ──────────────────────────────────────────────────────
 # Grype (or upstream tooling) can occasionally report the exact same
 # package + CVE/GHSA combination more than once (e.g. via multiple
